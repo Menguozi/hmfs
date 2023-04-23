@@ -19,6 +19,7 @@
 #include "node.h"
 #include "segment.h"
 #include "gc.h"
+#include "hc.h"
 
 static LIST_HEAD(f2fs_stat_list);
 static DEFINE_MUTEX(f2fs_stat_mutex);
@@ -550,6 +551,22 @@ static int stat_show(struct seq_file *s, void *v)
 				si->cache_mem >> 10);
 		seq_printf(s, "  - paged : %llu KB\n",
 				si->page_mem >> 10);
+
+		seq_printf(s, "new_blk_cnt = %u\n", hotness_info_ptr->new_blk_cnt);
+		seq_printf(s, "upd_blk_cnt = %u\n", hotness_info_ptr->upd_blk_cnt);
+		seq_printf(s, "opu_blk_cnt = %u\n", hotness_info_ptr->opu_blk_cnt);
+		seq_printf(s, "ipu_blk_cnt = %u\n", hotness_info_ptr->ipu_blk_cnt);
+		seq_printf(s, "rmv_blk_cnt = %u\n", hotness_info_ptr->rmv_blk_cnt);
+		if(si->sbi->centers_valid) {
+			for (j = 0; j < si->sbi->n_clusters; ++j) {
+				seq_printf(s, "centers[%u] = %u, ", j, si->sbi->centers[j]);
+			}
+			seq_printf(s, "\n");
+		}
+		seq_printf(s, "hot : count = %u, IRR_min = %u, IRR_max = %u\n", hotness_info_ptr->counts[HOT], hotness_info_ptr->IRR_min[HOT], hotness_info_ptr->IRR_max[HOT]);
+		seq_printf(s, "warm: count = %u, IRR_min = %u, IRR_max = %u\n", hotness_info_ptr->counts[WARM], hotness_info_ptr->IRR_min[WARM], hotness_info_ptr->IRR_max[WARM]);
+		seq_printf(s, "cold: count = %u, IRR_min = %u, IRR_max = %u\n", hotness_info_ptr->counts[COLD], hotness_info_ptr->IRR_min[COLD], hotness_info_ptr->IRR_max[COLD]);
+
 	}
 	mutex_unlock(&f2fs_stat_mutex);
 	return 0;
